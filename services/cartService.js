@@ -19,7 +19,7 @@ const calcTotalCartPrice = (cart) => {
 // @route   POST /api/v1/cart
 // @access  Private/User
 exports.addProductToCart = asyncHandler(async (req, res, next) => {
-  const { productId, color, size } = req.body;
+  const { productId, color, size, imageCover, title} = req.body;
   const product = await Product.findById(productId);
 
   if (!product) {
@@ -33,13 +33,15 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
     // Create cart for logged user with product
     cart = await Cart.create({
       user: req.user._id,
-      cartItems: [{ product: productId, color, size, price: product.price }],
+      cartItems: [{ product: productId, color, size, price: product.price, imageCover: product.imageCover, title: product.title }],
     });
   } else {
     // Product exists in cart? Update quantity
     const productIndex = cart.cartItems.findIndex(
       (item) =>
         item.product.toString() === productId &&
+        item.imageCover === imageCover &&
+        item.title === title &&
         item.color === color &&
         item.size === size
     );
@@ -48,7 +50,7 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
       cart.cartItems[productIndex].quantity += 1;
     } else {
       // Product not in cart, push to cartItems array
-      cart.cartItems.push({ product: productId, color, size, price: product.price });
+      cart.cartItems.push({ product: productId, color, size, price: product.price, imageCover: product.imageCover, title: product.title });
     }
   }
 
