@@ -27,8 +27,20 @@ exports.updateOne = (Model) =>
         new ApiError(`No document for this id ${req.params.id}`, 404)
       );
     }
-    // Trigger "save" event when update document
-    document.save();
+
+    // Format imageCover and images
+    const baseUrl = `${req.protocol}://${req.get('host')}/products`;
+
+    if (document.imageCover && !document.imageCover.startsWith('http')) {
+      document.imageCover = `${baseUrl}/${document.imageCover}`;
+    }
+
+    if (Array.isArray(document.images)) {
+      document.images = document.images.map((img) =>
+        img.startsWith('http') ? img : `${baseUrl}/${img}`
+      );
+    }
+
     res.status(200).json({ data: document });
   });
 
